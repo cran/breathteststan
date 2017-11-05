@@ -22,7 +22,7 @@
 #' @param model Name of model; use \code{names(stanmodels)} for other models.
 #'
 #'
-#' @return A list of classes "breathtestfit" and "breathteststanfit" with elements
+#' @return A list of classes "breathteststanfit" and "breathtestfit" with elements
 #' \itemize{
 #'   \item {\code{coef} Estimated parameters as data frame in a key-value format with
 #'    columns \code{patient_id, group, parameter, method} and \code{value}.
@@ -39,10 +39,8 @@
 #' suppressPackageStartupMessages(library(dplyr))
 #' d = simulate_breathtest_data(n_records = 3) # default 3 records
 #' data = cleanup_data(d$data)
-#' # Use more than 100 iterations and 4 chains for serious fits
-#' # For execution on a local, multicore CPU with excess RAM we recommend
-#' # calling \code{rstan_options(auto_write = TRUE)}.
-#' fit = stan_fit(data, chains = 1, iter = 100)
+#' # Use more than 80 iterations and 4 chains for serious fits
+#' fit = stan_fit(data, chains = 1, iter = 80)
 #' plot(fit) # calls plot.breathtestfit
 #' # Extract coefficients and compare these with those
 #' # used to generate the data
@@ -57,9 +55,9 @@
 #'          beta_in = beta.y, beta_out = beta.x,
 #'          k_in = k.y, k_out = k.x)
 #' # For a detailed analysis of the fit, use the shinystan library
-#' \dontrun{
+#' \donttest{
 #' library(shinystan)
-#' launch_shinystan(fit$stan_fit)
+#' # launch_shinystan(fit$stan_fit)
 #' }
 #' # The following plots are somewhat degenerate because
 #' # of the few iterations in stan_fit
@@ -79,6 +77,7 @@
 #' @importFrom tibble as_tibble
 #' @importFrom purrr map_df
 #' @importFrom stats na.omit quantile
+#' @import rstan
 #' @useDynLib breathteststan, .registration = TRUE
 #'
 #' @export
@@ -89,10 +88,12 @@ stan_fit = function(data, dose = 100, sample_minutes = 15, student_t_df = 10,
   # Avoid notes on CRAN
   value = pat_group = pat_group_i = NULL
   stat = estimate = . = k = key =  m = q_975 = NULL
+  cm = comment(data)
   data = breathtestcore::subsample_data(data, sample_minutes)
   # Integer index of records
   data$pat_group_i =  as.integer(as.factor(data$pat_group))
   n_record = max(data$pat_group_i)
+
   data_list = list(
     n = nrow(data),
     n_record = n_record,
@@ -120,26 +121,23 @@ stan_fit = function(data, dose = 100, sample_minutes = 15, student_t_df = 10,
 
   if (!exists("stanmodels"))
     stop("stanmodels not found")
-#  mod = breathteststan:::stanmodels[["breath_test_1"]]
-  mod = stanmodels$breath_test_1
+  mod = stanmodels[[model]]
   if (is.null(mod))
-    stop("stanmodels$breath_test_1 not found")
+    stop("Stan model", model,  "not found")
   options(mc.cores = max(parallel::detectCores()/2, 1))
   capture.output({fit = suppressWarnings(
     rstan::sampling(mod, data = data_list, init = init,
-                                    iter =  iter, chains = chains)
+                    control = list(adapt_delta = 0.9),
+                    iter =  iter, chains = chains)
   )})
 
   # Extract required parameters
-
-  m = as.vector(rstan::extract(fit, permuted = TRUE, pars = c( "m"))$m)
-
   cf = data.frame(pat_group_i = rep(1:n_record, each = chains*iter/2),
         m = as.vector(rstan::extract(fit, permuted = TRUE, pars = c( "m"))$m),
         beta = as.vector(rstan::extract(fit, permuted = TRUE, pars = c( "beta"))$beta),
         k = as.vector(rstan::extract(fit, permuted = TRUE, pars = c( "k"))$k))
   # Compute derived quantities
-  cf = cf %>%
+  coef_chain = cf %>%
     mutate(
       t50_maes_ghoos = t50_maes_ghoos(.),
       t50_maes_ghoos = t50_maes_ghoos(.),
@@ -151,6 +149,9 @@ stan_fit = function(data, dose = 100, sample_minutes = 15, student_t_df = 10,
     rename(m_exp_beta = m, k_exp_beta = k, beta_exp_beta = beta) %>%
     tidyr::gather(key, value, -pat_group_i) %>%
     na.omit() %>%
+    ungroup()
+
+  cf = coef_chain %>%
     group_by(pat_group_i, key) %>%
     summarize(
       estimate = mean(value),
@@ -170,7 +171,8 @@ stan_fit = function(data, dose = 100, sample_minutes = 15, student_t_df = 10,
    tidyr::gather(stat, value, estimate:q_975)
 
   data = data %>% select(-pat_group, -pat_group_i) # only used locally
-  ret = list(coef = cf, data = data, stan_fit = fit)
+  ret = list(coef = cf, data = data, stan_fit = fit, coef_chain = coef_chain)
+  comment(ret) = cm
   class(ret) = c("breathteststanfit", "breathtestfit")
   ret
 }
