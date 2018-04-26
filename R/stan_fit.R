@@ -4,9 +4,9 @@
 #' \url{https://menne-biomed.de/blog/breath-test-stan} for a comparision between
 #' single curve, mixed-model population and Bayesian methods.
 #'
-#' @param data Data frame or tibble as created by \code{\link{cleanup_data}},
+#' @param data Data frame or tibble as created by \code{\link[breathtestcore]{cleanup_data}},
 #' with mandatory columns \code{patient_id, group, minute} and \code{pdr}.
-#' It is recommended to run all data through \code{\link{cleanup_data}} which
+#' It is recommended to run all data through \code{\link[breathtestcore]{cleanup_data}} which
 #' will insert dummy columns for \code{patient_id} and \code{minute} if the
 #' data are distinct, and report an error if not. Since the Bayesian method
 #' is stabilized by priors, it is possible to fit single curves.
@@ -20,6 +20,7 @@
 #' @param chains Number of chains for Stan
 #' @param iter Number of iterations for each Stan chain
 #' @param model Name of model; use \code{names(stanmodels)} for other models.
+#' @param seed Optional seed for rstan
 #'
 #'
 #' @return A list of classes "breathteststanfit" and "breathtestfit" with elements
@@ -37,8 +38,8 @@
 #' @examples
 #' library(breathtestcore)
 #' suppressPackageStartupMessages(library(dplyr))
-#' d = simulate_breathtest_data(n_records = 3) # default 3 records
-#' data = cleanup_data(d$data)
+#' d = breathtestcore::simulate_breathtest_data(n_records = 3) # default 3 records
+#' data = breathtestcore::cleanup_data(d$data)
 #' # Use more than 80 iterations and 4 chains for serious fits
 #' fit = stan_fit(data, chains = 1, iter = 80)
 #' plot(fit) # calls plot.breathtestfit
@@ -69,7 +70,6 @@
 #' @import rstan
 #' @import methods
 #' @import dplyr
-#' @import breathtestcore
 #' @importFrom stats rnorm rlnorm
 #' @importFrom Rcpp loadModule
 #' @importFrom utils capture.output
@@ -83,7 +83,7 @@
 #' @export
 #'
 stan_fit = function(data, dose = 100, sample_minutes = 15, student_t_df = 10,
-                    chains = 2, iter = 1000, model = "breath_test_1") {
+                    chains = 2, iter = 1000, model = "breath_test_1", seed = 4711) {
 
   # Avoid notes on CRAN
   value = pat_group = pat_group_i = NULL
@@ -124,27 +124,28 @@ stan_fit = function(data, dose = 100, sample_minutes = 15, student_t_df = 10,
   mod = stanmodels[[model]]
   if (is.null(mod))
     stop("Stan model", model,  "not found")
-  options(mc.cores = max(parallel::detectCores()/2, 1))
+  options(mc.cores = min(chains, max(parallel::detectCores()/2, 1)))
   capture.output({fit = suppressWarnings(
     rstan::sampling(mod, data = data_list, init = init,
                     control = list(adapt_delta = 0.9),
+                    seed = seed,
                     iter =  iter, chains = chains)
   )})
 
   # Extract required parameters
   cf = data.frame(pat_group_i = rep(1:n_record, each = chains*iter/2),
-        m = as.vector(rstan::extract(fit, permuted = TRUE, pars = c( "m"))$m),
-        beta = as.vector(rstan::extract(fit, permuted = TRUE, pars = c( "beta"))$beta),
-        k = as.vector(rstan::extract(fit, permuted = TRUE, pars = c( "k"))$k))
+        m = as.vector(rstan::extract(fit, permuted = TRUE, pars = "m")$m),
+        beta = as.vector(rstan::extract(fit, permuted = TRUE, pars = "beta")$beta),
+        k = as.vector(rstan::extract(fit, permuted = TRUE, pars = "k")$k))
   # Compute derived quantities
   coef_chain = cf %>%
     mutate(
-      t50_maes_ghoos = t50_maes_ghoos(.),
-      t50_maes_ghoos = t50_maes_ghoos(.),
-      tlag_maes_ghoos = tlag_maes_ghoos(.),
-      t50_maes_ghoos_scintigraphy = t50_maes_ghoos_scintigraphy(.),
-      t50_bluck_coward = t50_bluck_coward(.),
-      tlag_bluck_coward = tlag_bluck_coward(.)
+      t50_maes_ghoos = breathtestcore::t50_maes_ghoos(.),
+      t50_maes_ghoos = breathtestcore::t50_maes_ghoos(.),
+      tlag_maes_ghoos = breathtestcore::tlag_maes_ghoos(.),
+      t50_maes_ghoos_scintigraphy = breathtestcore::t50_maes_ghoos_scintigraphy(.),
+      t50_bluck_coward = breathtestcore::t50_bluck_coward(.),
+      tlag_bluck_coward = breathtestcore::tlag_bluck_coward(.)
     ) %>%
     rename(m_exp_beta = m, k_exp_beta = k, beta_exp_beta = beta) %>%
     tidyr::gather(key, value, -pat_group_i) %>%
