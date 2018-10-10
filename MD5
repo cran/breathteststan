@@ -1,4 +1,4 @@
-4d620629d0229e754668dc73b4a3bc70 *DESCRIPTION
+5d73e51b0837f230303210fc67ab9c53 *DESCRIPTION
 45b3bc05c6889f835d558158a7955fd4 *NAMESPACE
 0036929e307d994e4c150a30372977d4 *R/as_matrix_coef_diff_by_group_stan.R
 214565eb33f525c179fd96cb5c4351a0 *R/breathteststan-package.R
@@ -8,15 +8,15 @@
 534b2040aed0f38127639aa9640a414c *R/stan_group_fit.R
 cfb1a46351561225e13fc3264d153067 *R/stanmodels.R
 5916984f98d8986b2dc3899784e64b5f *R/zzz.R
-395e5dfa91490edf1efad88f085ae74c *README.md
+8806e39bca2e7f6cb9779f1d77d5e721 *README.md
 3da0b15b0e97d3e1fc6582895f1d2ad2 *inst/include/meta_header.hpp
 70e8667ee47a12fca6281b776a756d70 *man/as.matrix.coef_diff_by_group_stan.Rd
 e2adf24879262caf1692924899c544d5 *man/coef_diff_by_group.Rd
 689c020b2010352e3569d1b72745eada *man/sigma.breathteststanfit.Rd
 7d0d370ee8c490240dcb3333d3f1fa59 *man/stan_fit.Rd
-01e69b8c1ec412fc64fea00cbea9ccb1 *man/stan_group_fit.Rd
-3fc9097c39ba6cee487eb57e702e3ef0 *src/Makevars
-ae60159313b1c2eb539f471a0e1f48b8 *src/Makevars.win
+9b1318ca10f3804fd46dcaa2156a51bf *man/stan_group_fit.Rd
+e1853561ff5c4e55634c21f15cab422b *src/Makevars
+3b7eb16ff5e1fb5d7b0fb949109900e0 *src/Makevars.win
 80ca2ff87f59c2a98280a1431ffa837f *src/init.cpp
 fac950bf0741e1e00ea2c5dd19325a81 *src/stan_files/breath_test_1.stan
 8a364d9ff28f6df2df098d815f83358a *src/stan_files/breath_test_group_1.stan
@@ -24,7 +24,7 @@ d41d8cd98f00b204e9800998ecf8427e *src/stan_files/chunks/license.stan
 0ab77202f341cb5a2a2cef1bd7ace93a *tests/testthat.R
 b397102a78d0be9198d2eff82c1ce5d3 *tests/testthat/helper_skip.R
 ba67a7a516662894636ce55097133579 *tests/testthat/test_as_matrix_coef_diff_by_group_stan.R
-d29666c397f0ad8dfb092ed1e12ad6c7 *tests/testthat/test_coef_by_group.R
+76d71dfa46c954fb059338c8a9e320ea *tests/testthat/test_coef_by_group.R
 2ad6db760a8e08700d07e6610540b9e9 *tests/testthat/test_coef_diff_by_group.R
 b4524e076dc98623188ec15ded8bd0bd *tests/testthat/test_stan_fit_1.R
 e21d014bf6330c6c190a3ba353e1c215 *tests/testthat/test_stan_fit_2.R

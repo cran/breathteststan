@@ -1,13 +1,15 @@
 ---
-title: "breathteststan: Bayesian fits to 13C Breath Test Time Series"
+title: "breathteststan: Bayesian fit to 13C Breath Test Time series for gastric emptying"
 author: "Dieter Menne"
 ---
 
 [![Travis-CI Build Status](https://travis-ci.org/dmenne/breathteststan.svg?branch=master)](https://travis-ci.org/dmenne/breathteststan)
 [![Coverage Status](https://coveralls.io/repos/github/dmenne/breathteststan/badge.svg?branch=master)](https://coveralls.io/github/dmenne/breathteststan?branch=master)
-[![CRAN](https://cranlogs.r-pkg.org/badges/grand-total/breathteststan)
+[![CRAN](https://cranlogs.r-pkg.org/badges/grand-total/breathteststan)](https://CRAN.R-project.org/package=breathteststan)
 ![CRAN](http://www.r-pkg.org/badges/last-release/breathteststan)
 
+
+Dieter Menne
 Menne Biomed Consulting Tübingen, Germany
 http://www.menne-biomed.de
 
