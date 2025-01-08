@@ -1,4 +1,4 @@
-5ef4f0b5abef0cf2a3c0d33e83269bc8 *DESCRIPTION
+aa4d9cf26f1c994692700c5456a17571 *DESCRIPTION
 688c11df2bb6b440c7dbef7793fac440 *NAMESPACE
 05d53d6c1b3f88cfded49316c20b5130 *R/breathteststan-package.R
 20f66b7f05d59b1ff3419b143ebe9936 *R/sigma.R
@@ -25,5 +25,6 @@ eef37529b0b92fadc67a7ce4765a56ca *tests/testthat/test_stan_fit_2.R
 547826e75ae1786b4300aa12467cd984 *tests/testthat/test_stan_fit_3.R
 907ec794d3ae8813050aca3eeff3ee58 *tests/testthat/test_stan_fit_4.R
 b8e72f105255adf8bb46ec7d287003bc *tests/testthat/test_stan_fit_5.R
+04b754de3aac9126bd2f4e11a7c5b7e7 *tests/testthat/test_stan_fit_6.R
 240510fe0f2844a94e141a76a4eabb1a *tools/make_cc.R
 f45ebddc0c420177fbdbefbc83353c3a *tools/make_cpp.R
